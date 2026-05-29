@@ -1,0 +1,112 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Auth Service
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=0
+
+        # School Service
+        - id: school-service
+          uri: lb://school-service
+          predicates:
+            - Path=/api/v1/schools/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # Student Service
+        - id: student-service
+          uri: lb://student-service
+          predicates:
+            - Path=/api/v1/students/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # Academic Service
+        - id: academic-service
+          uri: lb://academic-service
+          predicates:
+            - Path=/api/v1/academic/**,/api/v1/results/**,/api/v1/subjects/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # Guardian Service
+        - id: guardian-service
+          uri: lb://guardian-service
+          predicates:
+            - Path=/api/v1/guardians/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # File Service
+        - id: file-service
+          uri: lb://file-service
+          predicates:
+            - Path=/api/v1/files/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # Financial Service
+        - id: financial-service
+          uri: lb://financial-service
+          predicates:
+            - Path=/api/v1/financial/**,/api/v1/payments/**,/api/v1/fees/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+        # Notification Service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - StripPrefix=0
+            - name: JwtAuthenticationFilter
+
+    config:
+      uri: http://localhost:8888
+      fail-fast: false
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:admin123}@localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,routes
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,287 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: edumanage-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    networks:
+      - edumanage-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  service-registry:
+    build:
+      context: ./backend
+      dockerfile: service-registry/Dockerfile
+    container_name: edumanage-registry
+    restart: always
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - edumanage-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 150s
+
+  config-server:
+    build:
+      context: ./backend
+      dockerfile: config-server/Dockerfile
+    container_name: edumanage-config
+    restart: always
+    ports:
+      - "8888:8888"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    environment:
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 150s
+
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
+    container_name: edumanage-gateway
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+      - JWT_SECRET=${JWT_SECRET:-3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
+    networks:
+      - edumanage-net
+
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
+    container_name: edumanage-auth
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+
+  school-service:
+    build:
+      context: ./backend
+      dockerfile: school-service/Dockerfile
+    container_name: edumanage-school
+    restart: always
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+
+  student-service:
+    build:
+      context: ./backend
+      dockerfile: student-service/Dockerfile
+    container_name: edumanage-student
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+
+  academic-service:
+    build:
+      context: ./backend
+      dockerfile: academic-service/Dockerfile
+    container_name: edumanage-academic
+    restart: always
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+
+  guardian-service:
+    build:
+      context: ./backend
+      dockerfile: guardian-service/Dockerfile
+    container_name: edumanage-guardian
+    restart: always
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+    networks:
+      - edumanage-net
+
+  file-service:
+    build:
+      context: ./backend
+      dockerfile: file-service/Dockerfile
+    container_name: edumanage-file
+    restart: always
+    ports:
+      - "8086:8086"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+      - FILE_UPLOAD_DIR=/app/uploads
+    volumes:
+      - file_uploads:/app/uploads
+    networks:
+      - edumanage-net
+
+  financial-service:
+    build:
+      context: ./backend
+      dockerfile: financial-service/Dockerfile
+    container_name: edumanage-financial
+    restart: always
+    ports:
+      - "8087:8087"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+      - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY:-sk_test_placeholder}
+    networks:
+      - edumanage-net
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
+    container_name: edumanage-notification
+    restart: always
+    ports:
+      - "8088:8088"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - EUREKA_USER=admin
+      - EUREKA_PASSWORD=admin123
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - TERMII_API_KEY=${TERMII_API_KEY:-}
+    networks:
+      - edumanage-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: edumanage-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - edumanage-net
+
+volumes:
+  mysql_data:
+  file_uploads:
+
+networks:
+  edumanage-net:
+    driver: bridge

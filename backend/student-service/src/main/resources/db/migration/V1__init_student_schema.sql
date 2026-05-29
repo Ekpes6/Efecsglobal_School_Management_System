@@ -1,0 +1,36 @@
+-- EduManage NG - Student Service Database Schema
+-- V1: Initial schema
+
+CREATE TABLE IF NOT EXISTS students (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    school_id BIGINT NOT NULL,
+    admission_number VARCHAR(50) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE,
+    gender ENUM('MALE','FEMALE'),
+    blood_group VARCHAR(5),
+    genotype VARCHAR(5),
+    religion VARCHAR(50),
+    nationality VARCHAR(50) DEFAULT 'Nigerian',
+    state_of_origin VARCHAR(50),
+    lga_of_origin VARCHAR(100),
+    address VARCHAR(300),
+    phone_number VARCHAR(20),
+    email VARCHAR(150),
+    photo_url VARCHAR(500),
+    class_id BIGINT,
+    academic_level ENUM('CRECHE','NURSERY','PRIMARY','SECONDARY'),
+    admission_date DATE,
+    status ENUM('ACTIVE','GRADUATED','WITHDRAWN','SUSPENDED','DECEASED') NOT NULL DEFAULT 'ACTIVE',
+    user_id BIGINT,
+    nin VARCHAR(20),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_admission_school (admission_number, school_id),
+    INDEX idx_student_school (school_id),
+    INDEX idx_student_class (class_id),
+    INDEX idx_student_status (status),
+    INDEX idx_student_level (academic_level)
+);
