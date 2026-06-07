@@ -277,7 +277,7 @@ services:
       - api-gateway
     networks:
       - edumanage-net
-
+#vb
 volumes:
   mysql_data:
   file_uploads:
