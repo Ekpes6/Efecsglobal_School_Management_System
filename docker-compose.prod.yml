@@ -1,0 +1,49 @@
+# Production override — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# What this does:
+#   - Removes public port bindings for all internal services (only frontend port 80 and api-gateway port 8080 are exposed to the host)
+#   - Keeps MySQL off the public internet (no 3308 exposure)
+#   - Lets your host-level Nginx reverse-proxy into the containers
+
+services:
+  mysql:
+    ports: []   # no public exposure — only reachable inside edumanage-net
+
+  service-registry:
+    ports: []   # internal only
+
+  config-server:
+    ports: []   # internal only
+
+  auth-service:
+    ports: []   # internal only
+
+  school-service:
+    ports: []   # internal only
+
+  student-service:
+    ports: []   # internal only
+
+  academic-service:
+    ports: []   # internal only
+
+  guardian-service:
+    ports: []   # internal only
+
+  file-service:
+    ports: []   # internal only
+
+  financial-service:
+    ports: []   # internal only
+
+  notification-service:
+    ports: []   # internal only
+
+  api-gateway:
+    ports:
+      - "127.0.0.1:8080:8080"  # localhost-only; Nginx proxies to this
+
+  frontend:
+    ports:
+      - "127.0.0.1:3000:80"    # localhost-only; Nginx proxies to this
