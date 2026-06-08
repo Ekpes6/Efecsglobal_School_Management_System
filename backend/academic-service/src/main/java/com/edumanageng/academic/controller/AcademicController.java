@@ -1,15 +1,18 @@
 package com.edumanageng.academic.controller;
 
 import com.edumanageng.academic.dto.*;
+import com.edumanageng.academic.entity.Attendance;
 import com.edumanageng.academic.entity.Result;
 import com.edumanageng.academic.entity.Subject;
 import com.edumanageng.academic.service.AcademicService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -98,5 +101,34 @@ public class AcademicController {
         @PathVariable Long sessionId,
         @PathVariable Result.Term term) {
         return ResponseEntity.ok(academicService.getStudentTermResults(studentId, sessionId, term));
+    }
+
+    // Attendance
+    @PostMapping("/api/v1/attendance")
+    public ResponseEntity<List<Attendance>> markAttendance(@RequestBody List<Map<String, Object>> records) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(academicService.markAttendance(records));
+    }
+
+    @GetMapping("/api/v1/attendance/class/{classId}")
+    public ResponseEntity<List<Attendance>> getClassAttendance(
+        @PathVariable Long classId,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(academicService.getClassAttendance(classId, date));
+    }
+
+    @GetMapping("/api/v1/attendance/student/{studentId}/session/{sessionId}/term/{term}")
+    public ResponseEntity<List<Attendance>> getStudentAttendance(
+        @PathVariable Long studentId,
+        @PathVariable Long sessionId,
+        @PathVariable Result.Term term) {
+        return ResponseEntity.ok(academicService.getStudentAttendance(studentId, sessionId, term));
+    }
+
+    @GetMapping("/api/v1/attendance/student/{studentId}/summary")
+    public ResponseEntity<Map<String, Long>> getAttendanceSummary(
+        @PathVariable Long studentId,
+        @RequestParam Long sessionId,
+        @RequestParam Result.Term term) {
+        return ResponseEntity.ok(academicService.getAttendanceSummary(studentId, sessionId, term));
     }
 }

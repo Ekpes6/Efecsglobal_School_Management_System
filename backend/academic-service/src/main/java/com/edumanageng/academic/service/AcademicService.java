@@ -1,9 +1,11 @@
 package com.edumanageng.academic.service;
 
 import com.edumanageng.academic.dto.*;
+import com.edumanageng.academic.entity.Attendance;
 import com.edumanageng.academic.entity.Result;
 import com.edumanageng.academic.entity.Subject;
 import com.edumanageng.academic.exception.AcademicException;
+import com.edumanageng.academic.repository.AttendanceRepository;
 import com.edumanageng.academic.repository.ResultRepository;
 import com.edumanageng.academic.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,7 @@ public class AcademicService {
 
     private final ResultRepository resultRepository;
     private final SubjectRepository subjectRepository;
+    private final AttendanceRepository attendanceRepository;
 
     // ============ SUBJECT MANAGEMENT ============
 
@@ -200,5 +205,53 @@ public class AcademicService {
             .isPublished(result.isPublished())
             .createdAt(result.getCreatedAt())
             .build();
+    }
+
+    // ============ ATTENDANCE MANAGEMENT ============
+
+    public List<Attendance> markAttendance(List<Map<String, Object>> records) {
+        return records.stream().map(r -> {
+            Long studentId  = Long.valueOf(r.get("studentId").toString());
+            Long classId    = Long.valueOf(r.get("classId").toString());
+            Long sessionId  = Long.valueOf(r.get("sessionId").toString());
+            Long schoolId   = Long.valueOf(r.get("schoolId").toString());
+            Result.Term term = Result.Term.valueOf(r.get("term").toString());
+            LocalDate date  = LocalDate.parse(r.get("attendanceDate").toString());
+            Attendance.AttendanceStatus status = Attendance.AttendanceStatus.valueOf(r.get("status").toString());
+
+            // Upsert: update if record already exists for this student/class/date/term/session
+            Attendance att = attendanceRepository
+                .findByStudentIdAndClassIdAndAttendanceDateAndTermAndSessionId(studentId, classId, date, term, sessionId)
+                .orElseGet(Attendance::new);
+
+            att.setSchoolId(schoolId);
+            att.setStudentId(studentId);
+            att.setStudentName(r.getOrDefault("studentName", "").toString());
+            att.setClassId(classId);
+            att.setClassName(r.getOrDefault("className", "").toString());
+            att.setSessionId(sessionId);
+            att.setTerm(term);
+            att.setAttendanceDate(date);
+            att.setStatus(status);
+            att.setRemark(r.getOrDefault("remark", "").toString());
+            if (r.get("markedBy") != null) att.setMarkedBy(Long.valueOf(r.get("markedBy").toString()));
+
+            return attendanceRepository.save(att);
+        }).collect(Collectors.toList());
+    }
+
+    public List<Attendance> getClassAttendance(Long classId, LocalDate date) {
+        return attendanceRepository.findByClassIdAndAttendanceDateOrderByStudentName(classId, date);
+    }
+
+    public List<Attendance> getStudentAttendance(Long studentId, Long sessionId, Result.Term term) {
+        return attendanceRepository.findByStudentIdAndTermAndSessionId(studentId, term, sessionId);
+    }
+
+    public Map<String, Long> getAttendanceSummary(Long studentId, Long sessionId, Result.Term term) {
+        long present = attendanceRepository.countPresent(studentId, sessionId, term);
+        long total   = attendanceRepository.countTotal(studentId, sessionId, term);
+        long absent  = total - present;
+        return Map.of("present", present, "absent", absent, "total", total);
     }
 }
