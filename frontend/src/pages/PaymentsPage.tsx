@@ -22,11 +22,12 @@ export default function PaymentsPage() {
   const [feeForm, setFeeForm] = useState({ name: '', amount: '', feeType: 'TUITION', term: 'FIRST_TERM', sessionId: '' })
   const [payForm, setPayForm] = useState({ studentId: '', feeStructureId: '', amount: '', payerName: '', narration: '' })
 
-  const { data: fees = [] } = useQuery<FeeStructure[]>({
+  const { data: feesData } = useQuery({
     queryKey: ['fees', user?.schoolId],
-    queryFn: () => user?.schoolId ? financialApi.getFees(user.schoolId).then(r => r.data) : [],
+    queryFn: () => user?.schoolId ? financialApi.getFees(user.schoolId).then((r: { data: FeeStructure[] }) => r.data) : null,
     enabled: !!user?.schoolId,
   })
+  const fees: FeeStructure[] = feesData ?? []
 
   const { data: payments } = useQuery({
     queryKey: ['payments', user?.schoolId],
