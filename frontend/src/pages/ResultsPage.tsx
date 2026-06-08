@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { academicApi } from '../services/api'
 import { useState } from 'react'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Printer } from 'lucide-react'
 
 const TERMS = ['FIRST_TERM', 'SECOND_TERM', 'THIRD_TERM']
 
@@ -81,11 +81,18 @@ export default function ResultsPage() {
             <h2 className="font-semibold text-gray-800">
               Report Card — {term.replace('_', ' ')}
             </h2>
-            {average && (
-              <div className="text-sm text-gray-600">
-                Average: <span className="font-bold text-blue-700">{average}%</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {average && (
+                <div className="text-sm text-gray-600">
+                  Average: <span className="font-bold text-blue-700">{average}%</span>
+                </div>
+              )}
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors print:hidden">
+                <Printer className="w-4 h-4" /> Print
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

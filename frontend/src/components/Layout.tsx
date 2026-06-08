@@ -2,20 +2,21 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard, Users, BookOpen, DollarSign,
-  Bell, LogOut, Menu, X, GraduationCap, Home
+  Bell, LogOut, Menu, X, GraduationCap, Home, ClipboardList
 } from 'lucide-react'
 import { useState } from 'react'
 
 const MENU_ITEMS_ADMIN = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/students', label: 'Students', icon: Users },
-  { path: '/results', label: 'Results', icon: BookOpen },
-  { path: '/payments', label: 'Payments', icon: DollarSign },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
+  { path: '/dashboard',     label: 'Dashboard',      icon: LayoutDashboard },
+  { path: '/students',      label: 'Students',        icon: Users },
+  { path: '/attendance',    label: 'Attendance',      icon: ClipboardList },
+  { path: '/results',       label: 'Results',         icon: BookOpen },
+  { path: '/payments',      label: 'Fee Management',  icon: DollarSign },
+  { path: '/announcements', label: 'Announcements',   icon: Bell },
 ]
 
 const MENU_ITEMS_GUARDIAN = [
-  { path: '/dashboard', label: 'Dashboard', icon: Home },
+  { path: '/dashboard',      label: 'Dashboard', icon: Home },
   { path: '/guardian-portal', label: 'My Wards', icon: Users },
 ]
 

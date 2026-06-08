@@ -8,6 +8,9 @@ import DashboardPage from './pages/DashboardPage'
 import StudentsPage from './pages/StudentsPage'
 import ResultsPage from './pages/ResultsPage'
 import GuardianPortalPage from './pages/GuardianPortalPage'
+import PaymentsPage from './pages/PaymentsPage'
+import AnnouncementsPage from './pages/AnnouncementsPage'
+import AttendancePage from './pages/AttendancePage'
 
 export default function App() {
   return (
@@ -25,6 +28,9 @@ export default function App() {
             <Route path="/students" element={<Layout><StudentsPage /></Layout>} />
             <Route path="/results" element={<Layout><ResultsPage /></Layout>} />
             <Route path="/guardian-portal" element={<Layout><GuardianPortalPage /></Layout>} />
+            <Route path="/payments" element={<Layout><PaymentsPage /></Layout>} />
+            <Route path="/announcements" element={<Layout><AnnouncementsPage /></Layout>} />
+            <Route path="/attendance" element={<Layout><AttendancePage /></Layout>} />
           </Route>
 
           {/* Fallback */}

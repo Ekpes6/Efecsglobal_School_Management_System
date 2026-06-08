@@ -108,3 +108,22 @@ export const fileApi = {
   get: (id: number) => api.get(`/files/${id}`),
   delete: (id: number) => api.delete(`/files/${id}`),
 }
+
+// Notifications
+export const notificationApi = {
+  sendEmail: (data: object) => api.post('/notifications/send/email', data),
+  sendSms: (data: object) => api.post('/notifications/send/sms', data),
+  getSchoolNotifications: (schoolId: number) => api.get(`/notifications/school/${schoolId}`),
+  getUserNotifications: (userId: number) => api.get(`/notifications/user/${userId}`),
+}
+
+// Attendance
+export const attendanceApi = {
+  markAttendance: (records: object[]) => api.post('/attendance', records),
+  getClassAttendance: (classId: number, date: string) =>
+    api.get(`/attendance/class/${classId}`, { params: { date } }),
+  getStudentAttendance: (studentId: number, sessionId: number, term: string) =>
+    api.get(`/attendance/student/${studentId}/session/${sessionId}/term/${term}`),
+  getAttendanceSummary: (studentId: number, sessionId: number, term: string) =>
+    api.get(`/attendance/student/${studentId}/summary`, { params: { sessionId, term } }),
+}
