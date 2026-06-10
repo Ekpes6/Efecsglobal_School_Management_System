@@ -31,7 +31,7 @@ export default function PaymentsPage() {
 
   const { data: payments } = useQuery({
     queryKey: ['payments', user?.schoolId],
-    queryFn: () => user?.schoolId ? financialApi.getSchoolPayments(user.schoolId).then((r: { data: unknown }) => r.data) : null,
+    queryFn: () => user?.schoolId ? financialApi.getSchoolPayments(user.schoolId).then((r: { data: { content: Payment[] } }) => r.data) : null,
     enabled: !!user?.schoolId,
   })
 
